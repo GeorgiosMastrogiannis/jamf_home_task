@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-poem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-poem
+  template:
+    metadata:
+      labels:
+        app: nginx-poem
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: poem-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: poem-volume
+          configMap:
+            name: poem-config

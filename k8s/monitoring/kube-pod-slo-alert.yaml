@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kube-pod-availability-slo
+  namespace: monitoring
+spec:
+  groups:
+  - name: kube-pod-availability
+    rules:
+    - alert: KubePodAvailabilitySLOViolation
+      expr: |
+        sum by (namespace, pod) (
+          max by (namespace, pod) (
+            kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown|Failed|ErrImagePull|ImagePullBackOff"}
+          )
+        ) > 0
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod in failure state"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not healthy for more than 1 minute."
